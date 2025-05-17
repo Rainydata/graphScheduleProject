@@ -1,21 +1,24 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from .. import crud, models, schemas
-from ..database import SessionLocal
+import models, schemas
+from database import get_db
 
 router = APIRouter()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-@router.post("/courses/", response_model=schemas.Course)
+@router.post("/", response_model=schemas.Course)
 def create_course(course: schemas.CourseCreate, db: Session = Depends(get_db)):
-    return crud.create_course(db=db, course=course)
+    db_course = models.Course(
+        name=course.name,
+        system_room=course.system_room,
+        weekly_hours=course.weekly_hours,
+        Teacher_ID=course.Teacher_ID,
+        Classroom_ID=course.Classroom_ID
+    )
+    db.add(db_course)
+    db.commit()
+    db.refresh(db_course)
+    return db_course
 
-@router.get("/courses/{course_id}", response_model=schemas.Course)
-def get_course(course_id: int, db: Session = Depends(get_db)):
-    return crud.get_course(db=db, course_id=course_id)
+@router.get("/", response_model=list[schemas.Course])
+def list_courses(db: Session = Depends(get_db)):
+    return db.query(models.Course).all()

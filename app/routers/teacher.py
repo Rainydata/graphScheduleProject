@@ -1,23 +1,19 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from .. import crud, models, schemas
-from ..database import SessionLocal
+import models
+import schemas
+from database import get_db
 
 router = APIRouter()
 
-# Dependencia para obtener la sesión de la base de datos
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-# Rutas de ejemplo para Teacher
-@router.post("/teachers/", response_model=schemas.Teacher)
+@router.post("/", response_model=schemas.Teacher)
 def create_teacher(teacher: schemas.TeacherCreate, db: Session = Depends(get_db)):
-    return crud.create_teacher(db=db, teacher=teacher)
+    db_teacher = models.Teacher(Name=teacher.Name)
+    db.add(db_teacher)
+    db.commit()
+    db.refresh(db_teacher)
+    return db_teacher
 
-@router.get("/teachers/{teacher_id}", response_model=schemas.Teacher)
-def get_teacher(teacher_id: int, db: Session = Depends(get_db)):
-    return crud.get_teacher(db=db, teacher_id=teacher_id)
+@router.get("/", response_model=list[schemas.Teacher])
+def list_teachers(db: Session = Depends(get_db)):
+    return db.query(models.Teacher).all()

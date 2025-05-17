@@ -1,9 +1,8 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Date, Time
+from database import Base
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from app.database.connection import Base
 
 class Teacher(Base):
-    
     __tablename__ = 'teacher'
     
     Teacher_ID = Column(Integer, primary_key=True, index=True)

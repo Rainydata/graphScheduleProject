@@ -1,21 +1,25 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from .. import crud, models, schemas
-from ..database import SessionLocal
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from database import get_db
+from services.schedule_validador import build_schedule_graph_from_db, detect_conflicts
+
+import models
+import schemas
 
 router = APIRouter()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+@router.get("/validate-schedule/{teacher_id}")
+def validate_teacher_schedule(teacher_id: int, db: Session = Depends(get_db)):
+    graph, errors = build_schedule_graph_from_db(db, teacher_id)
+    if errors:
+        raise HTTPException(status_code=404, detail=errors)
 
-@router.post("/schedules/", response_model=schemas.Schedule)
-def create_schedule(schedule: schemas.ScheduleCreate, db: Session = Depends(get_db)):
-    return crud.create_schedule(db=db, schedule=schedule)
+    conflicts = detect_conflicts(graph)
 
-@router.get("/schedules/{schedule_id}", response_model=schemas.Schedule)
-def get_schedule(schedule_id: int, db: Session = Depends(get_db)):
-    return crud.get_schedule(db=db, schedule_id=schedule_id)
+    return {
+        "teacher_id": teacher_id,
+        "conflicts": conflicts,
+        "message": "Conflictos detectados" if conflicts else "Horario válido"
+    }

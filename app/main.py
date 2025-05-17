@@ -8,6 +8,10 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+@app.get("/")
+def read_root():
+    return {"message": "¡API de horarios funcionando!"}
+
 # Incluir routers
 app.include_router(teacher.router, prefix="/teachers", tags=["Teachers"])
 app.include_router(classroom.router, prefix="/classrooms", tags=["Classrooms"])
