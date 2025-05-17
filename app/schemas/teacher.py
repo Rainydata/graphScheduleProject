@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional
-import schemas
+
 
 class TeacherBase(BaseModel):
     Name: str
