@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-import schemas
-import models
-from database import SessionLocal
+from app.schemas.classroom import Classroom, ClassroomCreate
+from app.models.classroom import Classroom as ClassroomModel
+from app.database import SessionLocal
 
 router = APIRouter()
 
@@ -13,10 +13,18 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/classrooms/", response_model=schemas.Classroom)
-def create_classroom(classroom: schemas.ClassroomCreate, db: Session = Depends(get_db)):
-    return db.create_classroom(db=db, classroom=classroom)
+@router.post("/", response_model=Classroom)
+def create_classroom(classroom: ClassroomCreate, db: Session = Depends(get_db)):
+    db_classroom = ClassroomModel(
+        Name_Classroom=classroom.Name_Classroom,
+        Code_Classroom=classroom.Code_Classroom,
+        System_room=classroom.System_room,
+    )
+    db.add(db_classroom)
+    db.commit()
+    db.refresh(db_classroom)
+    return db_classroom
 
-@router.get("/classrooms/{classroom_id}", response_model=schemas.Classroom)
-def get_classroom(classroom_id: int, db: Session = Depends(get_db)):
-    return db.get_classroom(db=db, classroom_id=classroom_id)
+@router.get("/", response_model=list[Classroom])
+def list_classrooms(db: Session = Depends(get_db)):
+    return db.query(ClassroomModel).all()

@@ -1,6 +1,6 @@
-from .teacher import Teacher
-from .classroom import Classroom
-from .course import Course
-from .schedule import Schedule
-from .blocked_schedule import BlockedSchedule
-from .availability import TeacherAvailability, ClassroomAvailability
+from app.models.teacher import Teacher
+from app.models.classroom import Classroom
+from app.models.course import Course
+from app.models.schedule import Schedule
+from app.models.availability import TeacherAvailability, ClassroomAvailability
+from app.models.blocked_schedule import BlockedSchedule

@@ -1,4 +1,4 @@
-from database import Base
+from app.database import Base
 from sqlalchemy import Column, Integer, String, Time
 from sqlalchemy.orm import relationship
 
@@ -11,6 +11,5 @@ class BlockedSchedule(Base):
     Finish_time = Column(Time, nullable=False)
     type_block = Column(String)
 
-    schedules = relationship("Schedule", back_populates="blocked_schedule")
     teacher_availabilities = relationship("TeacherAvailability", back_populates="blocked_schedule")
     classroom_availabilities = relationship("ClassroomAvailability", back_populates="blocked_schedule")
